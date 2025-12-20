@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c34e59a20fc45aa8dc7ab43d1e786666",
+    "content-hash": "1371b5e85b1df176bc60603b7e1b8df3",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -6823,32 +6823,32 @@
         },
         {
             "name": "konradmichalik/php-doc-block-header-fixer",
-            "version": "0.3.0",
+            "version": "0.3.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jackd248/php-doc-block-header-fixer.git",
-                "reference": "6d11ce60f1e6ddfaf20b7c0d1f31a3a8cff25650"
+                "reference": "791ae4adae63d5c06534f31a9462b41064301692"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jackd248/php-doc-block-header-fixer/zipball/6d11ce60f1e6ddfaf20b7c0d1f31a3a8cff25650",
-                "reference": "6d11ce60f1e6ddfaf20b7c0d1f31a3a8cff25650",
+                "url": "https://api.github.com/repos/jackd248/php-doc-block-header-fixer/zipball/791ae4adae63d5c06534f31a9462b41064301692",
+                "reference": "791ae4adae63d5c06534f31a9462b41064301692",
                 "shasum": ""
             },
             "require": {
                 "ext-tokenizer": "*",
                 "friendsofphp/php-cs-fixer": "^3.14",
-                "php": "~8.1.0 || ~8.2.0 || ~8.3.0 || ~8.4.0"
+                "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0"
             },
             "require-dev": {
-                "armin/editorconfig-cli": "^1.0 || ^2.0",
-                "eliashaeussler/rector-config": "^3.0",
+                "armin/editorconfig-cli": "^2.0",
                 "ergebnis/composer-normalize": "^2.44",
                 "konradmichalik/php-cs-fixer-preset": "^0.1.0",
                 "phpstan/phpstan": "^2.0",
                 "phpstan/phpstan-phpunit": "^2.0",
                 "phpstan/phpstan-symfony": "^2.0",
-                "phpunit/phpunit": "^10.2 || ^11.0 || ^12.0"
+                "phpunit/phpunit": "^11.0 || ^12.0",
+                "rector/rector": "^2.2"
             },
             "type": "library",
             "autoload": {
@@ -6879,9 +6879,9 @@
             ],
             "support": {
                 "issues": "https://github.com/jackd248/php-doc-block-header-fixer/issues",
-                "source": "https://github.com/jackd248/php-doc-block-header-fixer/tree/0.3.0"
+                "source": "https://github.com/jackd248/php-doc-block-header-fixer/tree/0.3.3"
             },
-            "time": "2025-10-13T11:06:47+00:00"
+            "time": "2025-12-03T16:58:20+00:00"
         },
         {
             "name": "konradmichalik/phpstan-typo3-preset",
@@ -13161,5 +13161,5 @@
         "php": "~8.1.0 || ~8.2.0 || ~8.3.0 || ~8.4.0"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }
