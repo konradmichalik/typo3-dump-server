@@ -26,7 +26,7 @@
 		"friendsofphp/php-cs-fixer": "^3.52",
 		"helhum/typo3-console": "^7.0 || ^8.1",
 		"helmich/typo3-typoscript-lint": "^3.2",
-		"konradmichalik/php-cs-fixer-preset": "^0.1.0",
+		"konradmichalik/php-cs-fixer-preset": "^0.1.1",
 		"konradmichalik/php-doc-block-header-fixer": "^0.3.0",
 		"konradmichalik/phpstan-typo3-preset": "^0.1.0",
 		"phpstan/phpstan-deprecation-rules": "^1.0 || ^2.0",

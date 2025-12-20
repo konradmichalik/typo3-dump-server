@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c34e59a20fc45aa8dc7ab43d1e786666",
+    "content-hash": "54ad1b9e1e2470e1df7331f4c7b315f5",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -6765,32 +6765,32 @@
         },
         {
             "name": "konradmichalik/php-cs-fixer-preset",
-            "version": "0.1.0",
+            "version": "0.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jackd248/php-cs-fixer-preset.git",
-                "reference": "480a70abaeef501a839bbce3c99696024c205c2c"
+                "reference": "600fc181ae51e8262afc122ee9f743e75193dbcb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jackd248/php-cs-fixer-preset/zipball/480a70abaeef501a839bbce3c99696024c205c2c",
-                "reference": "480a70abaeef501a839bbce3c99696024c205c2c",
+                "url": "https://api.github.com/repos/jackd248/php-cs-fixer-preset/zipball/600fc181ae51e8262afc122ee9f743e75193dbcb",
+                "reference": "600fc181ae51e8262afc122ee9f743e75193dbcb",
                 "shasum": ""
             },
             "require": {
                 "friendsofphp/php-cs-fixer": "^3.14",
-                "php": "~8.1.0 || ~8.2.0 || ~8.3.0 || ~8.4.0",
+                "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0",
                 "symfony/finder": "^5.4 || ^6.0 || ^7.0"
             },
             "require-dev": {
-                "armin/editorconfig-cli": "^1.0 || ^2.0",
-                "eliashaeussler/rector-config": "^3.0",
+                "armin/editorconfig-cli": "^2.0",
                 "ergebnis/composer-normalize": "^2.44",
-                "konradmichalik/php-doc-block-header-fixer": "^0.2.2",
+                "konradmichalik/php-doc-block-header-fixer": "^0.3.0",
                 "phpstan/phpstan": "^2.0",
                 "phpstan/phpstan-phpunit": "^2.0",
                 "phpstan/phpstan-symfony": "^2.0",
-                "phpunit/phpunit": "^10.2 || ^11.0 || ^12.0"
+                "phpunit/phpunit": "^11.0 || ^12.0",
+                "rector/rector": "^2.2"
             },
             "type": "library",
             "extra": {
@@ -6817,9 +6817,9 @@
             "description": "Preset configuration for PHP-CS-Fixer",
             "support": {
                 "issues": "https://github.com/jackd248/php-cs-fixer-preset/issues",
-                "source": "https://github.com/jackd248/php-cs-fixer-preset/tree/0.1.0"
+                "source": "https://github.com/jackd248/php-cs-fixer-preset/tree/0.1.1"
             },
-            "time": "2025-10-08T05:44:53+00:00"
+            "time": "2025-11-24T14:15:10+00:00"
         },
         {
             "name": "konradmichalik/php-doc-block-header-fixer",
@@ -13161,5 +13161,5 @@
         "php": "~8.1.0 || ~8.2.0 || ~8.3.0 || ~8.4.0"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }
