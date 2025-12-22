@@ -126,7 +126,7 @@ final class DumpHandler
             try {
                 // Get TYPO3 PSR-14 event dispatcher
                 self::$eventDispatcher = GeneralUtility::makeInstance(EventDispatcherInterface::class);
-            } catch (Throwable $e) {
+            } catch (Throwable) {
                 // Event dispatcher not available (e.g., during bootstrap)
                 self::$eventDispatcher = null;
             }
