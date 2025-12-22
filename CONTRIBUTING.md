@@ -10,7 +10,7 @@ Thank you for considering contributing to this project! Every contribution is we
 
 ```bash
 # Clone repository
-git clone https://github.com/jackd248/typo3-dump-server.git
+git clone https://github.com/konradmichalik/typo3-dump-server.git
 cd typo3-dump-server
 
 # Start the project with DDEV
