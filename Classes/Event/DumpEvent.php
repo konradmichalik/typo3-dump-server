@@ -21,23 +21,15 @@ use function gettype;
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
-final class DumpEvent
+final readonly class DumpEvent
 {
-    private mixed $value;
-
-    /**
-     * @var array<string, mixed>
-     */
-    private array $context;
-
     /**
      * @param array<string, mixed> $context
      */
-    public function __construct(mixed $value, array $context = [])
-    {
-        $this->value = $value;
-        $this->context = $context;
-    }
+    public function __construct(
+        private mixed $value,
+        private array $context = [],
+    ) {}
 
     /**
      * @return array<string, mixed>
