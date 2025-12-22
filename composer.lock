@@ -6768,12 +6768,12 @@
             "version": "0.1.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/jackd248/php-cs-fixer-preset.git",
+                "url": "https://github.com/konradmichalik/php-cs-fixer-preset.git",
                 "reference": "480a70abaeef501a839bbce3c99696024c205c2c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jackd248/php-cs-fixer-preset/zipball/480a70abaeef501a839bbce3c99696024c205c2c",
+                "url": "https://api.github.com/repos/konradmichalik/php-cs-fixer-preset/zipball/480a70abaeef501a839bbce3c99696024c205c2c",
                 "reference": "480a70abaeef501a839bbce3c99696024c205c2c",
                 "shasum": ""
             },
@@ -6816,8 +6816,8 @@
             ],
             "description": "Preset configuration for PHP-CS-Fixer",
             "support": {
-                "issues": "https://github.com/jackd248/php-cs-fixer-preset/issues",
-                "source": "https://github.com/jackd248/php-cs-fixer-preset/tree/0.1.0"
+                "issues": "https://github.com/konradmichalik/php-cs-fixer-preset/issues",
+                "source": "https://github.com/konradmichalik/php-cs-fixer-preset/tree/0.1.0"
             },
             "time": "2025-10-08T05:44:53+00:00"
         },
@@ -6826,12 +6826,12 @@
             "version": "0.3.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/jackd248/php-doc-block-header-fixer.git",
+                "url": "https://github.com/konradmichalik/php-doc-block-header-fixer.git",
                 "reference": "6d11ce60f1e6ddfaf20b7c0d1f31a3a8cff25650"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jackd248/php-doc-block-header-fixer/zipball/6d11ce60f1e6ddfaf20b7c0d1f31a3a8cff25650",
+                "url": "https://api.github.com/repos/konradmichalik/php-doc-block-header-fixer/zipball/6d11ce60f1e6ddfaf20b7c0d1f31a3a8cff25650",
                 "reference": "6d11ce60f1e6ddfaf20b7c0d1f31a3a8cff25650",
                 "shasum": ""
             },
@@ -6878,8 +6878,8 @@
                 "phpdoc"
             ],
             "support": {
-                "issues": "https://github.com/jackd248/php-doc-block-header-fixer/issues",
-                "source": "https://github.com/jackd248/php-doc-block-header-fixer/tree/0.3.0"
+                "issues": "https://github.com/konradmichalik/php-doc-block-header-fixer/issues",
+                "source": "https://github.com/konradmichalik/php-doc-block-header-fixer/tree/0.3.0"
             },
             "time": "2025-10-13T11:06:47+00:00"
         },
@@ -6888,12 +6888,12 @@
             "version": "0.1.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/jackd248/phpstan-typo3-preset.git",
+                "url": "https://github.com/konradmichalik/phpstan-typo3-preset.git",
                 "reference": "975ccea47b03a8dd32bbc400b916909894c9f7aa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jackd248/phpstan-typo3-preset/zipball/975ccea47b03a8dd32bbc400b916909894c9f7aa",
+                "url": "https://api.github.com/repos/konradmichalik/phpstan-typo3-preset/zipball/975ccea47b03a8dd32bbc400b916909894c9f7aa",
                 "reference": "975ccea47b03a8dd32bbc400b916909894c9f7aa",
                 "shasum": ""
             },
@@ -6932,8 +6932,8 @@
             ],
             "description": "TYPO3 preset configuration for PHPStan",
             "support": {
-                "issues": "https://github.com/jackd248/phpstan-typo3-preset/issues",
-                "source": "https://github.com/jackd248/phpstan-typo3-preset/tree/0.1.0"
+                "issues": "https://github.com/konradmichalik/phpstan-typo3-preset/issues",
+                "source": "https://github.com/konradmichalik/phpstan-typo3-preset/tree/0.1.0"
             },
             "time": "2025-10-10T09:22:04+00:00"
         },
