@@ -10,6 +10,7 @@ additional_hostnames:
   - 11.typo3-dump-server
   - 12.typo3-dump-server
   - 13.typo3-dump-server
+  - 14.typo3-dump-server
 additional_fqdns: []
 database:
   type: mariadb
@@ -20,7 +21,7 @@ corepack_enable: false
 hooks:
   post-start:
     - exec: composer install --no-scripts
-    - exec: mkdir -p /var/www/html/.Build/ && cp /var/www/html/.ddev/.typo3-setup/templates/* /var/www/html/.Build/
+    - exec: mkdir -p /var/www/html/.Build/ && cp /var/www/html/.ddev/.setup/templates/* /var/www/html/.Build/
 
 
 # Key features of DDEV's config.yaml:
