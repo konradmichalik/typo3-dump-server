@@ -6,9 +6,9 @@
 
 [![Latest Stable Version](https://typo3-badges.dev/badge/typo3_dump_server/version/shields.svg)](https://extensions.typo3.org/extension/typo3_dump_server)
 [![Supported TYPO3 versions](https://typo3-badges.dev/badge/typo3_dump_server/typo3/shields.svg)](https://extensions.typo3.org/extension/typo3_dump_server)
-[![Coverage](https://img.shields.io/coverallsCoverage/github/jackd248/typo3-dump-server?logo=coveralls)](https://coveralls.io/github/jackd248/typo3-dump-server)
-[![CGL](https://img.shields.io/github/actions/workflow/status/jackd248/typo3-dump-server/cgl.yml?label=cgl&logo=github)](https://github.com/jackd248/typo3-dump-server/actions/workflows/cgl.yml)
-[![Tests](https://img.shields.io/github/actions/workflow/status/jackd248/typo3-dump-server/tests.yml?label=tests&logo=github)](https://github.com/jackd248/typo3-dump-server/actions/workflows/tests.yml)
+[![Coverage](https://img.shields.io/coverallsCoverage/github/konradmichalik/typo3-dump-server?logo=coveralls)](https://coveralls.io/github/konradmichalik/typo3-dump-server)
+[![CGL](https://img.shields.io/github/actions/workflow/status/konradmichalik/typo3-dump-server/cgl.yml?label=cgl&logo=github)](https://github.com/konradmichalik/typo3-dump-server/actions/workflows/cgl.yml)
+[![Tests](https://img.shields.io/github/actions/workflow/status/konradmichalik/typo3-dump-server/tests.yml?label=tests&logo=github)](https://github.com/konradmichalik/typo3-dump-server/actions/workflows/tests.yml)
 [![License](https://poser.pugx.org/konradmichalik/typo3-dump-server/license)](LICENSE.md)
 
 </div>
