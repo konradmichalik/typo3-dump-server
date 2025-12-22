@@ -35,8 +35,6 @@ final class DumpHandlerTest extends TestCase
 
         // Reset GLOBALS
         unset($GLOBALS['TYPO3_CONF_VARS']);
-
-        parent::tearDown();
     }
 
     public function testRegisterWithoutServerSetsNoHandler(): void
