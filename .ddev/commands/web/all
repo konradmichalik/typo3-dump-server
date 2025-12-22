@@ -4,7 +4,7 @@
 ## Usage: all
 ## Example: "ddev 11 composer du -o" or "ddev 11 typo3 cache:flush"
 
-. .ddev/.typo3-setup/scripts/.utils.sh
+. .ddev/.setup/scripts/utils.sh
 
 command=$@
 mapfile -t versions < <(get_supported_typo3_versions)
