@@ -66,8 +66,28 @@ Use the format option to change the output format to `html`:
 vendor/bin/typo3 server:dump --format=html > dump.html
 ```
 
-> [!NOTE]  
+> [!NOTE]
 > The dump server will be available at `tcp://127.0.0.1:9912` by default. Use the environment variable `TYPO3_DUMP_SERVER_HOST` to change the host.
+
+### IDE Deep Links
+
+Click on source file paths in the dump output to open them directly in your IDE. Configure the IDE via environment variable:
+
+```bash
+TYPO3_DUMP_SERVER_IDE=phpstorm
+```
+
+Supported IDEs: `phpstorm`, `vscode`, `sublime`, `textmate`, `atom`
+
+You can also use a custom URL pattern with `%file%` and `%line%` placeholders:
+
+```bash
+TYPO3_DUMP_SERVER_IDE="myide://open?file=%file%&line=%line%"
+```
+
+### TYPO3 Context
+
+The dump server automatically displays the TYPO3 version and application context (e.g. `Development`, `Production`) alongside each dump output.
 
 ### Dump
 
