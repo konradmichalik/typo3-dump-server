@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3DumpServer\Utility;
 
+use function count;
+
 /**
  * EnvironmentHelper.
  *

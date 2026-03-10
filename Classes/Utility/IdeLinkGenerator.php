@@ -22,7 +22,7 @@ use function str_replace;
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
-final class IdeLinkGenerator
+final readonly class IdeLinkGenerator
 {
     /**
      * @var array<string, string>
@@ -35,17 +35,11 @@ final class IdeLinkGenerator
         'atom' => 'atom://core/open/file?filename=%file%&line=%line%',
     ];
 
-    private readonly string $pattern;
+    private string $pattern;
 
-    private readonly ?string $pathFrom;
-
-    private readonly ?string $pathTo;
-
-    public function __construct(string $ide, ?string $pathFrom = null, ?string $pathTo = null)
+    public function __construct(string $ide, private ?string $pathFrom = null, private ?string $pathTo = null)
     {
         $this->pattern = self::IDE_PATTERNS[$ide] ?? $ide;
-        $this->pathFrom = $pathFrom;
-        $this->pathTo = $pathTo;
     }
 
     public function generate(string $file, int $line): string
