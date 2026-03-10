@@ -109,6 +109,39 @@ final class IdeLinkGeneratorTest extends TestCase
     }
 
     #[Test]
+    public function generateAppliesPathMapping(): void
+    {
+        $generator = new IdeLinkGenerator('phpstorm', '/var/www/html', '/Users/me/Projects');
+
+        self::assertSame(
+            'phpstorm://open?file=/Users/me/Projects/test.php&line=42',
+            $generator->generate('/var/www/html/test.php', 42),
+        );
+    }
+
+    #[Test]
+    public function generateIgnoresPathMappingWhenNotConfigured(): void
+    {
+        $generator = new IdeLinkGenerator('phpstorm');
+
+        self::assertSame(
+            'phpstorm://open?file=/var/www/html/test.php&line=42',
+            $generator->generate('/var/www/html/test.php', 42),
+        );
+    }
+
+    #[Test]
+    public function generateKeepsOriginalPathWhenMappingDoesNotMatch(): void
+    {
+        $generator = new IdeLinkGenerator('phpstorm', '/opt/app', '/Users/me/Projects');
+
+        self::assertSame(
+            'phpstorm://open?file=/var/www/html/test.php&line=42',
+            $generator->generate('/var/www/html/test.php', 42),
+        );
+    }
+
+    #[Test]
     #[DataProvider('isSupportedDataProvider')]
     public function isSupportedReturnsExpectedResult(string $ide, bool $expected): void
     {

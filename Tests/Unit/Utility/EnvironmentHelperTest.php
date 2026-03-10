@@ -30,6 +30,10 @@ final class EnvironmentHelperTest extends TestCase
 
     private string $originalIdeValue;
 
+    private string $originalPathMapValue;
+
+    private string $originalDdevAppRootValue;
+
     protected function setUp(): void
     {
         $dumpServerHost = getenv('TYPO3_DUMP_SERVER_HOST');
@@ -37,6 +41,12 @@ final class EnvironmentHelperTest extends TestCase
 
         $dumpServerIde = getenv('TYPO3_DUMP_SERVER_IDE');
         $this->originalIdeValue = is_string($dumpServerIde) ? $dumpServerIde : '';
+
+        $dumpServerPathMap = getenv('TYPO3_DUMP_SERVER_PATH_MAP');
+        $this->originalPathMapValue = is_string($dumpServerPathMap) ? $dumpServerPathMap : '';
+
+        $ddevAppRoot = getenv('DDEV_APPROOT');
+        $this->originalDdevAppRootValue = is_string($ddevAppRoot) ? $ddevAppRoot : '';
     }
 
     protected function tearDown(): void
@@ -51,6 +61,18 @@ final class EnvironmentHelperTest extends TestCase
             putenv('TYPO3_DUMP_SERVER_IDE='.$this->originalIdeValue);
         } else {
             putenv('TYPO3_DUMP_SERVER_IDE');
+        }
+
+        if ('' !== $this->originalPathMapValue) {
+            putenv('TYPO3_DUMP_SERVER_PATH_MAP='.$this->originalPathMapValue);
+        } else {
+            putenv('TYPO3_DUMP_SERVER_PATH_MAP');
+        }
+
+        if ('' !== $this->originalDdevAppRootValue) {
+            putenv('DDEV_APPROOT='.$this->originalDdevAppRootValue);
+        } else {
+            putenv('DDEV_APPROOT');
         }
     }
 
@@ -107,5 +129,81 @@ final class EnvironmentHelperTest extends TestCase
         $ide = EnvironmentHelper::getIde();
 
         self::assertNull($ide);
+    }
+
+    public function testGetPathMappingReturnsNullWhenNotSet(): void
+    {
+        putenv('TYPO3_DUMP_SERVER_PATH_MAP');
+        putenv('DDEV_APPROOT');
+
+        self::assertNull(EnvironmentHelper::getPathMapping());
+    }
+
+    public function testGetPathMappingReturnsNullWhenEmpty(): void
+    {
+        putenv('TYPO3_DUMP_SERVER_PATH_MAP=');
+        putenv('DDEV_APPROOT');
+
+        self::assertNull(EnvironmentHelper::getPathMapping());
+    }
+
+    public function testGetPathMappingReturnsMappingWhenSet(): void
+    {
+        putenv('TYPO3_DUMP_SERVER_PATH_MAP=/var/www/html=/Users/me/Projects');
+
+        $mapping = EnvironmentHelper::getPathMapping();
+
+        self::assertSame(['/var/www/html', '/Users/me/Projects'], $mapping);
+    }
+
+    public function testGetPathMappingReturnsNullWhenInvalidFormat(): void
+    {
+        putenv('TYPO3_DUMP_SERVER_PATH_MAP=/var/www/html');
+
+        self::assertNull(EnvironmentHelper::getPathMapping());
+    }
+
+    public function testGetPathMappingReturnsNullWhenFromIsEmpty(): void
+    {
+        putenv('TYPO3_DUMP_SERVER_PATH_MAP==/Users/me/Projects');
+
+        self::assertNull(EnvironmentHelper::getPathMapping());
+    }
+
+    public function testGetPathMappingHandlesPathsWithEquals(): void
+    {
+        putenv('TYPO3_DUMP_SERVER_PATH_MAP=/var/www/html=/Users/me/Pro=jects');
+
+        $mapping = EnvironmentHelper::getPathMapping();
+
+        self::assertSame(['/var/www/html', '/Users/me/Pro=jects'], $mapping);
+    }
+
+    public function testGetPathMappingFallsToDdevAppRoot(): void
+    {
+        putenv('TYPO3_DUMP_SERVER_PATH_MAP');
+        putenv('DDEV_APPROOT=/Users/me/Sites/myproject');
+
+        $mapping = EnvironmentHelper::getPathMapping();
+
+        self::assertSame(['/var/www/html', '/Users/me/Sites/myproject'], $mapping);
+    }
+
+    public function testGetPathMappingPrefersExplicitOverDdev(): void
+    {
+        putenv('TYPO3_DUMP_SERVER_PATH_MAP=/opt/app=/Users/me/custom');
+        putenv('DDEV_APPROOT=/Users/me/Sites/myproject');
+
+        $mapping = EnvironmentHelper::getPathMapping();
+
+        self::assertSame(['/opt/app', '/Users/me/custom'], $mapping);
+    }
+
+    public function testGetPathMappingIgnoresEmptyDdevAppRoot(): void
+    {
+        putenv('TYPO3_DUMP_SERVER_PATH_MAP');
+        putenv('DDEV_APPROOT=');
+
+        self::assertNull(EnvironmentHelper::getPathMapping());
     }
 }
