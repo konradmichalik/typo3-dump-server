@@ -47,7 +47,7 @@ final class DumpHandler
         if (self::isServerAvailable(EnvironmentHelper::getHost())) {
             self::registerServerHandler();
         } elseif (self::shouldSuppressDump()) {
-            VarDumper::setHandler(function (): void {});
+            VarDumper::setHandler(static function (): void {});
         }
     }
 

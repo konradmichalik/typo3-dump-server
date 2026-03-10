@@ -99,7 +99,7 @@ EOF
         $errorIo->success(sprintf('Server listening on %s', $server->getHost()));
         $errorIo->comment('Quit the server with CONTROL-C.');
 
-        $server->listen(function (Data $data, array $context, int $clientId) use ($descriptor, $io) {
+        $server->listen(static function (Data $data, array $context, int $clientId) use ($descriptor, $io) {
             $descriptor->describe($io, $data, $context, $clientId);
         });
 
