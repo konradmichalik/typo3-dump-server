@@ -40,15 +40,15 @@ Stop the server with `Ctrl+C`.
 ```bash
 ddev ssh
 cd .Build/13
-vendor/bin/typo3 server:dump --format=html --no-ansi > /var/www/html/dump.html
+vendor/bin/typo3 server:dump --format=html --no-ansi > /var/www/html/.Build/dump.html
 ```
 
 Trigger a dump by visiting the frontend, then stop the server with `Ctrl+C`.
 
-Open the HTML file in the browser:
+Open the HTML file in the browser (from the host, not inside `ddev ssh`):
 
 ```bash
-open dump.html
+ddev launch /dump.html
 ```
 
 Expected: styled HTML page with dump output, TYPO3 badge, and source file info.
@@ -72,7 +72,7 @@ For HTML format:
 
 ```bash
 export TYPO3_DUMP_SERVER_IDE=vscode
-vendor/bin/typo3 server:dump --format=html --no-ansi > /var/www/html/dump.html
+vendor/bin/typo3 server:dump --format=html --no-ansi > /var/www/html/.Build/dump.html
 ```
 
 Expected: source file links in the HTML are `<a href="vscode://file/...">` and open the IDE on click.
