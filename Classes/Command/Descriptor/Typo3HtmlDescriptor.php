@@ -264,8 +264,10 @@ final class Typo3HtmlDescriptor implements DumpDescriptorInterface
      */
     private function extractTimestamp(array $context): int
     {
-        return isset($context['timestamp']) && is_float($context['timestamp'])
-            ? (int) $context['timestamp']
+        $timestamp = $context['timestamp'] ?? null;
+
+        return is_int($timestamp) || is_float($timestamp)
+            ? (int) $timestamp
             : 0;
     }
 

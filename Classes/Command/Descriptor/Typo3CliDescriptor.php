@@ -51,8 +51,9 @@ final class Typo3CliDescriptor implements DumpDescriptorInterface
         $this->dumper->setColors($output->isDecorated());
 
         /** @var array<string, mixed> $context */
-        $timestamp = isset($context['timestamp']) && is_float($context['timestamp'])
-            ? (int) $context['timestamp']
+        $rawTimestamp = $context['timestamp'] ?? null;
+        $timestamp = is_int($rawTimestamp) || is_float($rawTimestamp)
+            ? (int) $rawTimestamp
             : 0;
         $rows = [['date', date('r', $timestamp)]];
         $lastIdentifier = $this->lastIdentifier;
