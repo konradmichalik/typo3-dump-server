@@ -13,14 +13,15 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3DumpServer\Command;
 
-use KonradMichalik\Typo3DumpServer\Utility\EnvironmentHelper;
+use KonradMichalik\Typo3DumpServer\Command\Descriptor\{Typo3CliDescriptor, Typo3HtmlDescriptor};
+use KonradMichalik\Typo3DumpServer\Utility\{EnvironmentHelper, IdeLinkGenerator};
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\{InputInterface, InputOption};
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\VarDumper\Cloner\Data;
-use Symfony\Component\VarDumper\Command\Descriptor\{CliDescriptor, DumpDescriptorInterface, HtmlDescriptor};
+use Symfony\Component\VarDumper\Command\Descriptor\DumpDescriptorInterface;
 use Symfony\Component\VarDumper\Dumper\{CliDumper, HtmlDumper};
 use Symfony\Component\VarDumper\Server\DumpServer;
 
@@ -45,9 +46,11 @@ final class DumpServerCommand extends Command
      */
     public function __construct(?string $name = null, array $descriptors = [])
     {
+        $ideLinkGenerator = $this->createIdeLinkGenerator();
+
         $this->descriptors = $descriptors + [
-            'cli' => new CliDescriptor(new CliDumper()),
-            'html' => new HtmlDescriptor(new HtmlDumper()),
+            'cli' => new Typo3CliDescriptor(new CliDumper(), $ideLinkGenerator),
+            'html' => new Typo3HtmlDescriptor(new HtmlDumper(), $ideLinkGenerator),
         ];
         parent::__construct($name);
     }
@@ -109,5 +112,16 @@ EOF
     private function getAvailableFormats(): array
     {
         return array_keys($this->descriptors);
+    }
+
+    private function createIdeLinkGenerator(): ?IdeLinkGenerator
+    {
+        $ide = EnvironmentHelper::getIde();
+
+        if (null === $ide || !IdeLinkGenerator::isSupported($ide)) {
+            return null;
+        }
+
+        return new IdeLinkGenerator($ide);
     }
 }
