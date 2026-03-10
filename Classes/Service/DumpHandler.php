@@ -5,7 +5,7 @@ declare(strict_types=1);
 /*
  * This file is part of the "typo3_dump_server" TYPO3 CMS extension.
  *
- * (c) 2025 Konrad Michalik <hej@konradmichalik.dev>
+ * (c) 2025-2026 Konrad Michalik <hej@konradmichalik.dev>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3DumpServer\Service;
 
+use KonradMichalik\Typo3DumpServer\Dumper\ContextProvider\Typo3ContextProvider;
 use KonradMichalik\Typo3DumpServer\Event\DumpEvent;
 use KonradMichalik\Typo3DumpServer\Utility\EnvironmentHelper;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -46,7 +47,7 @@ final class DumpHandler
         if (self::isServerAvailable(EnvironmentHelper::getHost())) {
             self::registerServerHandler();
         } elseif (self::shouldSuppressDump()) {
-            VarDumper::setHandler(function (): void {});
+            VarDumper::setHandler(static function (): void {});
         }
     }
 
@@ -57,6 +58,7 @@ final class DumpHandler
         $dumper = new ServerDumper(EnvironmentHelper::getHost(), $fallbackDumper, [
             'cli' => new CliContextProvider(),
             'source' => new SourceContextProvider(),
+            'typo3' => new Typo3ContextProvider(),
         ]);
 
         VarDumper::setHandler(static function (mixed $var) use ($cloner, $dumper): ?string {
