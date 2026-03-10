@@ -5,7 +5,7 @@ declare(strict_types=1);
 /*
  * This file is part of the "typo3_dump_server" TYPO3 CMS extension.
  *
- * (c) 2025 Konrad Michalik <hej@konradmichalik.dev>
+ * (c) 2025-2026 Konrad Michalik <hej@konradmichalik.dev>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -96,7 +96,7 @@ EOF
         $errorIo->success(sprintf('Server listening on %s', $server->getHost()));
         $errorIo->comment('Quit the server with CONTROL-C.');
 
-        $server->listen(function (Data $data, array $context, int $clientId) use ($descriptor, $io) {
+        $server->listen(static function (Data $data, array $context, int $clientId) use ($descriptor, $io) {
             $descriptor->describe($io, $data, $context, $clientId);
         });
 
