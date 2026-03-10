@@ -24,12 +24,16 @@ use function bin2hex;
 use function date;
 use function dirname;
 use function file_get_contents;
+use function htmlspecialchars;
 use function is_array;
 use function is_float;
 use function is_int;
 use function is_string;
 use function random_bytes;
 use function sprintf;
+
+use const ENT_QUOTES;
+use const ENT_SUBSTITUTE;
 
 /**
  * Typo3HtmlDescriptor.
@@ -71,8 +75,9 @@ final class Typo3HtmlDescriptor implements DumpDescriptorInterface
             static fn (?string $value): bool => null !== $value,
         );
 
+        $safeDedupIdentifier = $this->escape($dedupIdentifier);
         $output->writeln(<<<HTML
-            <article data-dedup-id="{$dedupIdentifier}">
+            <article data-dedup-id="{$safeDedupIdentifier}">
                 <header>
                     <div class="row">
                         <h2 class="col">{$title}</h2>
@@ -116,7 +121,7 @@ final class Typo3HtmlDescriptor implements DumpDescriptorInterface
             $method = is_string($context['request']['method'] ?? null) ? $context['request']['method'] : '';
             $uri = is_string($context['request']['uri'] ?? null) ? $context['request']['uri'] : '';
 
-            return sprintf('<code>%s</code> <a href="%s">%s</a>', $method, $uri, $uri);
+            return sprintf('<code>%s</code> <a href="%s">%s</a>', $this->escape($method), $this->escape($uri), $this->escape($uri));
         }
 
         if (isset($context['cli']) && is_array($context['cli'])) {
@@ -124,7 +129,7 @@ final class Typo3HtmlDescriptor implements DumpDescriptorInterface
                 ? $context['cli']['command_line']
                 : '';
 
-            return '<code>$ </code>'.$commandLine;
+            return '<code>$ </code>'.$this->escape($commandLine);
         }
 
         return '-';
@@ -183,7 +188,7 @@ final class Typo3HtmlDescriptor implements DumpDescriptorInterface
 
         $projectDir = $context['source']['project_dir'] ?? null;
 
-        return is_string($projectDir) ? $projectDir : null;
+        return is_string($projectDir) ? $this->escape($projectDir) : null;
     }
 
     /**
@@ -197,13 +202,13 @@ final class Typo3HtmlDescriptor implements DumpDescriptorInterface
 
         /** @var array<string, mixed> $source */
         $source = $context['source'];
-        $name = is_string($source['name'] ?? null) ? $source['name'] : '-';
+        $name = is_string($source['name'] ?? null) ? $this->escape($source['name']) : '-';
         $line = $this->extractLineNumber($source);
         $description = sprintf('%s on line %d', $name, $line);
 
         $fileLink = $this->resolveFileLink($source);
         if (null !== $fileLink) {
-            $description = sprintf('<a href="%s">%s</a>', $fileLink, $description);
+            $description = sprintf('<a href="%s">%s</a>', $this->escape($fileLink), $description);
         }
 
         return $description;
@@ -222,7 +227,7 @@ final class Typo3HtmlDescriptor implements DumpDescriptorInterface
         $version = is_string($typo3['version'] ?? null) ? $typo3['version'] : '-';
         $appContext = is_string($typo3['context'] ?? null) ? $typo3['context'] : '-';
 
-        return sprintf('TYPO3 %s (%s)', $version, $appContext);
+        return sprintf('TYPO3 %s (%s)', $this->escape($version), $this->escape($appContext));
     }
 
     /**
@@ -262,6 +267,11 @@ final class Typo3HtmlDescriptor implements DumpDescriptorInterface
         return isset($context['timestamp']) && is_float($context['timestamp'])
             ? (int) $context['timestamp']
             : 0;
+    }
+
+    private function escape(string $value): string
+    {
+        return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     }
 
     /**
