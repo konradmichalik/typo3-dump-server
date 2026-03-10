@@ -23,6 +23,8 @@ final class EnvironmentHelper
 {
     private const DEFAULT_HOST = 'tcp://127.0.0.1:9912';
 
+    private const DDEV_CONTAINER_ROOT = '/var/www/html';
+
     public static function getHost(): string
     {
         $host = getenv('TYPO3_DUMP_SERVER_HOST');
@@ -43,5 +45,31 @@ final class EnvironmentHelper
         }
 
         return $ide;
+    }
+
+    /**
+     * @return array{string, string}|null
+     */
+    public static function getPathMapping(): ?array
+    {
+        $mapping = getenv('TYPO3_DUMP_SERVER_PATH_MAP');
+
+        if (false !== $mapping && '' !== $mapping) {
+            $parts = explode('=', $mapping, 2);
+
+            if (2 === count($parts) && '' !== $parts[0] && '' !== $parts[1]) {
+                return [$parts[0], $parts[1]];
+            }
+
+            return null;
+        }
+
+        $ddevAppRoot = getenv('DDEV_APPROOT');
+
+        if (false !== $ddevAppRoot && '' !== $ddevAppRoot) {
+            return [self::DDEV_CONTAINER_ROOT, $ddevAppRoot];
+        }
+
+        return null;
     }
 }

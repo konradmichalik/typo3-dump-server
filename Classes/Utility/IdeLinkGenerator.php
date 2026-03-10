@@ -37,13 +37,23 @@ final class IdeLinkGenerator
 
     private readonly string $pattern;
 
-    public function __construct(string $ide)
+    private readonly ?string $pathFrom;
+
+    private readonly ?string $pathTo;
+
+    public function __construct(string $ide, ?string $pathFrom = null, ?string $pathTo = null)
     {
         $this->pattern = self::IDE_PATTERNS[$ide] ?? $ide;
+        $this->pathFrom = $pathFrom;
+        $this->pathTo = $pathTo;
     }
 
     public function generate(string $file, int $line): string
     {
+        if (null !== $this->pathFrom && null !== $this->pathTo) {
+            $file = str_replace($this->pathFrom, $this->pathTo, $file);
+        }
+
         return str_replace(
             ['%file%', '%line%'],
             [$file, (string) $line],
