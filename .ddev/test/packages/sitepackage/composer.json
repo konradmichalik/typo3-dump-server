@@ -10,7 +10,7 @@
       }
     ],
     "require": {
-      "konradmichalik/typo3-dump-server": "0.7.0"
+      "konradmichalik/typo3-dump-server": "0.7.1"
     },
     "suggest": {},
     "conflict": {},
