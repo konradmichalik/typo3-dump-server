@@ -69,6 +69,9 @@ vendor/bin/typo3 server:dump --format=html > dump.html
 > [!NOTE]
 > The dump server will be available at `tcp://127.0.0.1:9912` by default. Use the environment variable `TYPO3_DUMP_SERVER_HOST` to change the host.
 
+> [!WARNING]
+> The dump server protocol is unauthenticated and unencrypted, and dumps often contain sensitive data (credentials, session data, personal data). Keep the server bound to a loopback address (`127.0.0.1`) — never expose it via `0.0.0.0` or a public interface. Install the extension as a dev dependency (`composer require --dev`) so it is not deployed to production systems.
+
 ### IDE Deep Links
 
 Click on source file paths in the dump output to open them directly in your IDE. Configure the IDE via environment variable:
