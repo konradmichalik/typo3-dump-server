@@ -89,8 +89,11 @@ final class DumpHandler
             // Dispatch PSR-14 event with original variable
             $eventDispatcher = self::getEventDispatcher();
             if (null !== $eventDispatcher) {
-                $event = new DumpEvent($var, $context);
-                $eventDispatcher->dispatch($event);
+                try {
+                    $eventDispatcher->dispatch(new DumpEvent($var, $context));
+                } catch (Throwable) {
+                    // A faulty listener must never break the dump itself
+                }
             }
 
             return $dumper->dump($data);

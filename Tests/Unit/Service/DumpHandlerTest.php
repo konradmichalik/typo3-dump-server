@@ -15,7 +15,10 @@ namespace KonradMichalik\Typo3DumpServer\Tests\Unit\Service;
 
 use KonradMichalik\Typo3DumpServer\Service\DumpHandler;
 use PHPUnit\Framework\TestCase;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use ReflectionClass;
+use ReflectionProperty;
+use RuntimeException;
 use Symfony\Component\VarDumper\VarDumper;
 
 use function is_array;
@@ -44,6 +47,9 @@ final class DumpHandlerTest extends TestCase
 
         // Reset GLOBALS
         unset($GLOBALS['TYPO3_CONF_VARS']);
+
+        // Reset cached event dispatcher
+        (new ReflectionProperty(DumpHandler::class, 'eventDispatcher'))->setValue(null, null);
 
         if ('' !== $this->originalHostValue) {
             putenv('TYPO3_DUMP_SERVER_HOST='.$this->originalHostValue);
@@ -84,6 +90,32 @@ final class DumpHandlerTest extends TestCase
         self::assertTrue(
             $this->hasPendingConnection($server),
             'The first dump() call should connect to the dump server',
+        );
+
+        fclose($server);
+    }
+
+    public function testDumpStillReachesServerWhenEventListenerThrows(): void
+    {
+        $server = stream_socket_server('tcp://127.0.0.1:0');
+        self::assertNotFalse($server);
+        $address = stream_socket_get_name($server, false);
+        putenv('TYPO3_DUMP_SERVER_HOST=tcp://'.$address);
+
+        $throwingDispatcher = new class implements EventDispatcherInterface {
+            public function dispatch(object $event): object
+            {
+                throw new RuntimeException('listener failure');
+            }
+        };
+        (new ReflectionProperty(DumpHandler::class, 'eventDispatcher'))->setValue(null, $throwingDispatcher);
+
+        DumpHandler::register();
+        dump('test');
+
+        self::assertTrue(
+            $this->hasPendingConnection($server),
+            'A throwing event listener must not prevent the dump from reaching the server',
         );
 
         fclose($server);
