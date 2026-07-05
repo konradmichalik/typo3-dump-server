@@ -122,6 +122,8 @@ EOF
             return null;
         }
 
-        return new IdeLinkGenerator($ide);
+        [$pathFrom, $pathTo] = EnvironmentHelper::getPathMapping() ?? [null, null];
+
+        return new IdeLinkGenerator($ide, $pathFrom, $pathTo);
     }
 }
