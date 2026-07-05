@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3DumpServer\Service;
 
+use Closure;
 use KonradMichalik\Typo3DumpServer\Dumper\ContextProvider\Typo3ContextProvider;
 use KonradMichalik\Typo3DumpServer\Event\DumpEvent;
 use KonradMichalik\Typo3DumpServer\Utility\EnvironmentHelper;
@@ -40,18 +41,38 @@ final class DumpHandler
     private static ?EventDispatcherInterface $eventDispatcher = null;
 
     /**
+     * Installs a lazy handler: the dump server is only probed on the first
+     * dump() call, so requests without dumps never touch the socket.
+     *
      * @see https://symfony.com/doc/current/components/var_dumper.html#the-dump-server
      */
     public static function register(): void
     {
-        if (self::isServerAvailable(EnvironmentHelper::getHost())) {
-            self::registerServerHandler();
-        } elseif (self::shouldSuppressDump()) {
-            VarDumper::setHandler(static function (): void {});
-        }
+        VarDumper::setHandler(static fn (mixed $var): mixed => self::dumpWithResolvedHandler($var));
     }
 
-    private static function registerServerHandler(): void
+    private static function dumpWithResolvedHandler(mixed $var): mixed
+    {
+        if (self::isServerAvailable(EnvironmentHelper::getHost())) {
+            $handler = self::createServerHandler();
+            VarDumper::setHandler($handler);
+
+            return $handler($var);
+        }
+
+        if (self::shouldSuppressDump()) {
+            VarDumper::setHandler(static function (): void {});
+
+            return null;
+        }
+
+        // Neither server nor suppression: restore Symfony's default dump behavior
+        VarDumper::setHandler(null);
+
+        return VarDumper::dump($var);
+    }
+
+    private static function createServerHandler(): Closure
     {
         $cloner = new VarCloner();
         $fallbackDumper = in_array(\PHP_SAPI, ['cli', 'phpdbg'], true) ? new CliDumper() : new HtmlDumper();
@@ -61,7 +82,7 @@ final class DumpHandler
             'typo3' => new Typo3ContextProvider(),
         ]);
 
-        VarDumper::setHandler(static function (mixed $var) use ($cloner, $dumper): ?string {
+        return static function (mixed $var) use ($cloner, $dumper): ?string {
             $data = $cloner->cloneVar($var);
             $context = [];
 
@@ -73,7 +94,7 @@ final class DumpHandler
             }
 
             return $dumper->dump($data);
-        });
+        };
     }
 
     private static function shouldSuppressDump(): bool
