@@ -105,7 +105,7 @@ final class DumpHandlerTest extends TestCase
         $throwingDispatcher = new class implements EventDispatcherInterface {
             public function dispatch(object $event): object
             {
-                throw new RuntimeException('listener failure');
+                throw new RuntimeException('listener failure', 2834025464);
             }
         };
         (new ReflectionProperty(DumpHandler::class, 'eventDispatcher'))->setValue(null, $throwingDispatcher);
