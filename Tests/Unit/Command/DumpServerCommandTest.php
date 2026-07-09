@@ -16,6 +16,7 @@ namespace KonradMichalik\Typo3DumpServer\Tests\Unit\Command;
 use KonradMichalik\Typo3DumpServer\Command\DumpServerCommand;
 use KonradMichalik\Typo3DumpServer\Utility\IdeLinkGenerator;
 use PHPUnit\Framework\TestCase;
+use ReflectionMethod;
 use ReflectionProperty;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -97,6 +98,24 @@ final class DumpServerCommandTest extends TestCase
         $this->expectExceptionMessage('Unsupported format "invalid".');
 
         $this->command->run($input, $output);
+    }
+
+    public function testNonStringFormatOptionThrowsException(): void
+    {
+        $input = new class(['--format' => 'cli']) extends ArrayInput {
+            public function getOption(string $name): mixed
+            {
+                return 'format' === $name ? true : parent::getOption($name);
+            }
+        };
+        $output = new BufferedOutput();
+
+        $method = new ReflectionMethod($this->command, 'execute');
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Format option must be a string.');
+
+        $method->invoke($this->command, $input, $output);
     }
 
     public function testValidFormatsAreAccepted(): void

@@ -146,6 +146,17 @@ final class DumpHandlerTest extends TestCase
         self::assertSame('', $output);
     }
 
+    public function testDumpFallsBackToDefaultHandlerWhenServerUnavailableAndNotSuppressed(): void
+    {
+        putenv('TYPO3_DUMP_SERVER_HOST=tcp://127.0.0.1:59999');
+
+        DumpHandler::register();
+
+        $result = dump('fallback-value');
+
+        self::assertSame('fallback-value', $result);
+    }
+
     public function testIsServerAvailableReturnsFalseForInvalidHost(): void
     {
         $reflection = new ReflectionClass(DumpHandler::class);
