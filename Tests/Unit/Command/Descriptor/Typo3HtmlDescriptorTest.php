@@ -22,6 +22,8 @@ use Symfony\Component\VarDumper\Cloner\VarCloner;
 use Symfony\Component\VarDumper\Command\Descriptor\DumpDescriptorInterface;
 use Symfony\Component\VarDumper\Dumper\HtmlDumper;
 
+use function strlen;
+
 /**
  * Typo3HtmlDescriptorTest.
  *
@@ -185,6 +187,71 @@ final class Typo3HtmlDescriptorTest extends TestCase
         ]);
 
         self::assertStringNotContainsString('href=', $result);
+    }
+
+    #[Test]
+    public function describeOnlyRendersStylesOnFirstCall(): void
+    {
+        $descriptor = new Typo3HtmlDescriptor(new HtmlDumper());
+        $output = new BufferedOutput();
+        $data = (new VarCloner())->cloneVar('test');
+        $context = ['timestamp' => microtime(true)];
+
+        $descriptor->describe($output, $data, $context, 1);
+        $firstCall = $output->fetch();
+
+        $descriptor->describe($output, $data, $context, 2);
+        $secondCall = $output->fetch();
+
+        // Only the first call injects the shared htmlDescriptor.css/js assets,
+        // so its output is necessarily larger than a repeat call's.
+        self::assertGreaterThan(strlen($secondCall), strlen($firstCall));
+    }
+
+    #[Test]
+    public function describeOutputsCliTitleAndDedupIdentifierWithoutRequest(): void
+    {
+        $result = $this->describeWithContext([
+            'timestamp' => microtime(true),
+            'cli' => [
+                'identifier' => 'cli-1',
+                'command_line' => 'bin/console some:command',
+            ],
+        ]);
+
+        self::assertStringContainsString('bin/console some:command', $result);
+        self::assertStringContainsString('data-dedup-id="cli-1"', $result);
+    }
+
+    #[Test]
+    public function describeDefaultsCliTitleWhenCommandLineIsMissing(): void
+    {
+        $result = $this->describeWithContext([
+            'timestamp' => microtime(true),
+            'cli' => [
+                'identifier' => 'cli-2',
+            ],
+        ]);
+
+        self::assertStringContainsString('<code>$ </code>', $result);
+    }
+
+    #[Test]
+    public function describeOutputsControllerAndDedupIdentifierFromRequest(): void
+    {
+        $cloner = new VarCloner();
+        $result = $this->describeWithContext([
+            'timestamp' => microtime(true),
+            'request' => [
+                'identifier' => 'req-1',
+                'method' => 'GET',
+                'uri' => '/some/path',
+                'controller' => $cloner->cloneVar('SomeController::action'),
+            ],
+        ]);
+
+        self::assertStringContainsString('data-dedup-id="req-1"', $result);
+        self::assertStringContainsString('dumped-tag', $result);
     }
 
     /**

@@ -15,6 +15,7 @@ namespace KonradMichalik\Typo3DumpServer\Tests\Unit\ViewHelpers;
 
 use KonradMichalik\Typo3DumpServer\ViewHelpers\DumpViewHelper;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\VarDumper\VarDumper;
 
 /**
  * DumpViewHelperTest.
@@ -40,5 +41,43 @@ final class DumpViewHelperTest extends TestCase
     public function testViewHelperExtendsAbstractViewHelper(): void
     {
         self::assertInstanceOf(\TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper::class, $this->viewHelper);
+    }
+
+    public function testRenderReturnsStringResultFromRenderChildren(): void
+    {
+        $viewHelper = new class extends DumpViewHelper {
+            public function renderChildren(): mixed
+            {
+                return 'child content';
+            }
+        };
+
+        VarDumper::setHandler(static function (): void {});
+        try {
+            $result = $viewHelper->render();
+        } finally {
+            VarDumper::setHandler(null);
+        }
+
+        self::assertSame('child content', $result);
+    }
+
+    public function testRenderReturnsEmptyStringForNonStringResult(): void
+    {
+        $viewHelper = new class extends DumpViewHelper {
+            public function renderChildren(): mixed
+            {
+                return ['not', 'a', 'string'];
+            }
+        };
+
+        VarDumper::setHandler(static function (): void {});
+        try {
+            $result = $viewHelper->render();
+        } finally {
+            VarDumper::setHandler(null);
+        }
+
+        self::assertSame('', $result);
     }
 }

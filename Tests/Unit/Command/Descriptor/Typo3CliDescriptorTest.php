@@ -111,4 +111,90 @@ final class Typo3CliDescriptorTest extends TestCase
         self::assertStringContainsString('TestController.php', $result);
         self::assertStringContainsString('42', $result);
     }
+
+    #[Test]
+    public function describeDefaultsTimestampWhenMissing(): void
+    {
+        $descriptor = new Typo3CliDescriptor(new CliDumper());
+        $output = new BufferedOutput();
+        $cloner = new VarCloner();
+        $data = $cloner->cloneVar('test');
+
+        $descriptor->describe($output, $data, [], 1);
+        $result = $output->fetch();
+
+        self::assertStringContainsString('1970', $result);
+    }
+
+    #[Test]
+    public function describeOutputsHttpRequestContextWithController(): void
+    {
+        $descriptor = new Typo3CliDescriptor(new CliDumper());
+        $output = new BufferedOutput();
+        $cloner = new VarCloner();
+        $data = $cloner->cloneVar('test');
+
+        $context = [
+            'timestamp' => microtime(true),
+            'request' => [
+                'identifier' => 'req-1',
+                'method' => 'GET',
+                'uri' => '/some/path',
+                'controller' => $cloner->cloneVar('SomeController::action'),
+            ],
+        ];
+
+        $descriptor->describe($output, $data, $context, 1);
+        $result = $output->fetch();
+
+        self::assertStringContainsString('GET /some/path', $result);
+        self::assertStringContainsString('controller', $result);
+    }
+
+    #[Test]
+    public function describeOutputsCliContextWithoutRequest(): void
+    {
+        $descriptor = new Typo3CliDescriptor(new CliDumper());
+        $output = new BufferedOutput();
+        $cloner = new VarCloner();
+        $data = $cloner->cloneVar('test');
+
+        $context = [
+            'timestamp' => microtime(true),
+            'cli' => [
+                'identifier' => 'cli-1',
+                'command_line' => 'bin/console some:command',
+            ],
+        ];
+
+        $descriptor->describe($output, $data, $context, 1);
+        $result = $output->fetch();
+
+        self::assertStringContainsString('bin/console some:command', $result);
+    }
+
+    #[Test]
+    public function describeUsesFileRelativeOverFile(): void
+    {
+        $descriptor = new Typo3CliDescriptor(new CliDumper());
+        $output = new BufferedOutput();
+        $cloner = new VarCloner();
+        $data = $cloner->cloneVar('test');
+
+        $context = [
+            'timestamp' => microtime(true),
+            'source' => [
+                'name' => 'TestController.php',
+                'file' => '/var/www/html/Classes/Controller/TestController.php',
+                'file_relative' => 'Classes/Controller/TestController.php',
+                'line' => 42,
+            ],
+        ];
+
+        $descriptor->describe($output, $data, $context, 1);
+        $result = $output->fetch();
+
+        self::assertStringContainsString('Classes/Controller/TestController.php', $result);
+        self::assertStringNotContainsString('/var/www/html/Classes', $result);
+    }
 }
