@@ -89,6 +89,9 @@ EOF
             throw new InvalidArgumentException(sprintf('Unsupported format "%s".', $format), 8369534570);
         }
 
+        // @codeCoverageIgnoreStart
+        // DumpServer::listen() blocks until the process is killed (CONTROL-C), so this
+        // path cannot be exercised by an automated test without hanging the test run.
         $server = new DumpServer(EnvironmentHelper::getHost());
 
         $errorIo = $io->getErrorStyle();
@@ -104,6 +107,7 @@ EOF
         });
 
         return Command::SUCCESS;
+        // @codeCoverageIgnoreEnd
     }
 
     /**
