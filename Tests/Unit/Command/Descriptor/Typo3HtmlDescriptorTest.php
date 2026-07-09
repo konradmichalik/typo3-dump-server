@@ -108,4 +108,96 @@ final class Typo3HtmlDescriptorTest extends TestCase
 
         self::assertStringContainsString('TestController.php on line 42', $result);
     }
+
+    #[Test]
+    public function describeRendersHttpRequestUriAsLink(): void
+    {
+        $result = $this->describeWithContext([
+            'timestamp' => microtime(true),
+            'request' => [
+                'method' => 'GET',
+                'uri' => 'https://example.com/page',
+            ],
+        ]);
+
+        self::assertStringContainsString('<a href="https://example.com/page">', $result);
+    }
+
+    #[Test]
+    public function describeDoesNotLinkRequestUriWithUnsafeScheme(): void
+    {
+        $result = $this->describeWithContext([
+            'timestamp' => microtime(true),
+            'request' => [
+                'method' => 'GET',
+                'uri' => 'javascript:alert(1)',
+            ],
+        ]);
+
+        self::assertStringNotContainsString('href=', $result);
+        self::assertStringContainsString('javascript:alert(1)', $result);
+    }
+
+    #[Test]
+    public function describeUsesFileLinkFromContext(): void
+    {
+        $result = $this->describeWithContext([
+            'timestamp' => microtime(true),
+            'source' => [
+                'name' => 'TestController.php',
+                'file' => '/var/www/html/Classes/Controller/TestController.php',
+                'line' => 42,
+                'file_link' => 'phpstorm://open?file=/var/www/html/Classes/Controller/TestController.php&line=42',
+            ],
+        ]);
+
+        self::assertStringContainsString('<a href="phpstorm://open?file=', $result);
+    }
+
+    #[Test]
+    public function describeIgnoresFileLinkWithUnsafeScheme(): void
+    {
+        $result = $this->describeWithContext([
+            'timestamp' => microtime(true),
+            'source' => [
+                'name' => 'TestController.php',
+                'file' => '/var/www/html/Classes/Controller/TestController.php',
+                'line' => 42,
+                'file_link' => 'javascript:alert(1)',
+            ],
+        ]);
+
+        self::assertStringNotContainsString('href=', $result);
+        self::assertStringContainsString('TestController.php on line 42', $result);
+    }
+
+    #[Test]
+    public function describeIgnoresFileLinkWithoutScheme(): void
+    {
+        $result = $this->describeWithContext([
+            'timestamp' => microtime(true),
+            'source' => [
+                'name' => 'TestController.php',
+                'file' => '/var/www/html/Classes/Controller/TestController.php',
+                'line' => 42,
+                'file_link' => "java\tscript:alert(1)",
+            ],
+        ]);
+
+        self::assertStringNotContainsString('href=', $result);
+    }
+
+    /**
+     * @param array<string, mixed> $context
+     */
+    private function describeWithContext(array $context): string
+    {
+        $descriptor = new Typo3HtmlDescriptor(new HtmlDumper());
+        $output = new BufferedOutput();
+        $data = (new VarCloner())->cloneVar('test');
+
+        $descriptor->describe($output, $data, $context, 1);
+
+        return $output->fetch();
+    }
 }

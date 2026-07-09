@@ -25,15 +25,19 @@ use function date;
 use function dirname;
 use function file_get_contents;
 use function htmlspecialchars;
+use function in_array;
 use function is_array;
 use function is_float;
 use function is_int;
 use function is_string;
+use function parse_url;
 use function random_bytes;
 use function sprintf;
+use function strtolower;
 
 use const ENT_QUOTES;
 use const ENT_SUBSTITUTE;
+use const PHP_URL_SCHEME;
 
 /**
  * Typo3HtmlDescriptor.
@@ -43,6 +47,11 @@ use const ENT_SUBSTITUTE;
  */
 final class Typo3HtmlDescriptor implements DumpDescriptorInterface
 {
+    /**
+     * Schemes a browser executes as script when used as link target.
+     */
+    private const UNSAFE_LINK_SCHEMES = ['javascript', 'data', 'vbscript'];
+
     private bool $initialized = false;
 
     public function __construct(
@@ -118,10 +127,7 @@ final class Typo3HtmlDescriptor implements DumpDescriptorInterface
     private function resolveTitle(array $context): string
     {
         if (isset($context['request']) && is_array($context['request'])) {
-            $method = is_string($context['request']['method'] ?? null) ? $context['request']['method'] : '';
-            $uri = is_string($context['request']['uri'] ?? null) ? $context['request']['uri'] : '';
-
-            return sprintf('<code>%s</code> <a href="%s">%s</a>', $this->escape($method), $this->escape($uri), $this->escape($uri));
+            return $this->resolveRequestTitle($context['request']);
         }
 
         if (isset($context['cli']) && is_array($context['cli'])) {
@@ -133,6 +139,22 @@ final class Typo3HtmlDescriptor implements DumpDescriptorInterface
         }
 
         return '-';
+    }
+
+    /**
+     * @param array<mixed, mixed> $request
+     */
+    private function resolveRequestTitle(array $request): string
+    {
+        $method = is_string($request['method'] ?? null) ? $request['method'] : '';
+        $uri = is_string($request['uri'] ?? null) ? $request['uri'] : '';
+        $safeUri = $this->escape($uri);
+
+        if ($this->hasSafeLinkScheme($uri)) {
+            $safeUri = sprintf('<a href="%s">%s</a>', $safeUri, $safeUri);
+        }
+
+        return sprintf('<code>%s</code> %s', $this->escape($method), $safeUri);
     }
 
     /**
@@ -246,7 +268,14 @@ final class Typo3HtmlDescriptor implements DumpDescriptorInterface
 
         $fileLink = $source['file_link'] ?? null;
 
-        return is_string($fileLink) ? $fileLink : null;
+        return is_string($fileLink) && $this->hasSafeLinkScheme($fileLink) ? $fileLink : null;
+    }
+
+    private function hasSafeLinkScheme(string $url): bool
+    {
+        $scheme = parse_url($url, PHP_URL_SCHEME);
+
+        return is_string($scheme) && !in_array(strtolower($scheme), self::UNSAFE_LINK_SCHEMES, true);
     }
 
     /**
