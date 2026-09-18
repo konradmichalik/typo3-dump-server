@@ -84,6 +84,10 @@ ddev 13 composer install
 ddev all typo3 database:updateschema
 ```
 
+## Manual feature testing
+
+For a step-by-step checklist covering every feature (dump server, HTML/JSON formats, IDE deep links, events, ViewHelper, multi-version testing), see [`Documentation/DEVELOPMENT.md`](Documentation/DEVELOPMENT.md).
+
 ## Submit a pull request
 
 After completing your work, **open a pull request** and provide a description of your changes. Ideally, your PR should reference an issue that explains the problem you are addressing.
