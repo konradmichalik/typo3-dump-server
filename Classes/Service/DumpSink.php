@@ -42,13 +42,13 @@ use const SEEK_END;
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
-final class DumpSink
+final readonly class DumpSink
 {
     public const DEFAULT_MAX_FILE_SIZE = 5 * 1024 * 1024;
 
     public function __construct(
-        private readonly DumpPayloadFactory $payloadFactory,
-        private readonly int $maxFileSize,
+        private DumpPayloadFactory $payloadFactory,
+        private int $maxFileSize,
     ) {}
 
     public static function withDefaults(): self

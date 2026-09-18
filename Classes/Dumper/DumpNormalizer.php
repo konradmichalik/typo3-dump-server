@@ -38,7 +38,7 @@ use function substr;
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
-final class DumpNormalizer
+final readonly class DumpNormalizer
 {
     public const DEFAULT_MAX_DEPTH = 10;
 
@@ -47,9 +47,9 @@ final class DumpNormalizer
     public const DEFAULT_MAX_STRING_LENGTH = 5000;
 
     public function __construct(
-        private readonly int $maxDepth,
-        private readonly int $maxItems,
-        private readonly int $maxStringLength,
+        private int $maxDepth,
+        private int $maxItems,
+        private int $maxStringLength,
     ) {}
 
     public static function withDefaults(): self

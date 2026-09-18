@@ -28,10 +28,10 @@ use function is_array;
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
-final class DumpPayloadFactory
+final readonly class DumpPayloadFactory
 {
     public function __construct(
-        private readonly DumpNormalizer $normalizer,
+        private DumpNormalizer $normalizer,
     ) {}
 
     public static function withDefaults(): self

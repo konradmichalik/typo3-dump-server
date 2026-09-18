@@ -33,10 +33,10 @@ use const JSON_PARTIAL_OUTPUT_ON_ERROR;
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
-final class Typo3JsonDescriptor implements DumpDescriptorInterface
+final readonly class Typo3JsonDescriptor implements DumpDescriptorInterface
 {
     public function __construct(
-        private readonly DumpPayloadFactory $payloadFactory,
+        private DumpPayloadFactory $payloadFactory,
     ) {}
 
     public static function withDefaults(): self
