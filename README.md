@@ -5,7 +5,7 @@
 # TYPO3 extension `typo3_dump_server`
 
 [![Latest Stable Version](https://typo3-badges.dev/badge/typo3_dump_server/version/shields.svg)](https://extensions.typo3.org/extension/typo3_dump_server)
-![TYPO3](https://img.shields.io/badge/TYPO3-11.5%20%7C%2012.4%20%7C%2013.4%20%7C%2014.0-orange.svg)
+![TYPO3](https://img.shields.io/badge/TYPO3-11.5%20%7C%2012.4%20%7C%2013.4%20%7C%2014.3-orange.svg)
 [![Coverage](https://coveralls.io/repos/github/konradmichalik/typo3-dump-server/badge.svg?branch=main)](https://coveralls.io/github/konradmichalik/typo3-dump-server)
 [![CGL](https://img.shields.io/github/actions/workflow/status/konradmichalik/typo3-dump-server/cgl.yml?label=cgl&logo=github)](https://github.com/konradmichalik/typo3-dump-server/actions/workflows/cgl.yml)
 [![Tests](https://img.shields.io/github/actions/workflow/status/konradmichalik/typo3-dump-server/tests.yml?label=tests&logo=github)](https://github.com/konradmichalik/typo3-dump-server/actions/workflows/tests.yml)
@@ -16,12 +16,20 @@
 This extension brings the [Symfony Var Dump Server](https://symfony.com/doc/current/components/var_dumper.html#the-dump-server) to TYPO3.
 
 > [!NOTE]
-> This package is an alternative approach to the default [TYPO3 debugging methods](https://docs.typo3.org/m/typo3/reference-coreapi/main/en-us/ApiOverview/Debugging/Index.html) or 
+> This package is an alternative approach to the default [TYPO3 debugging methods](https://docs.typo3.org/m/typo3/reference-coreapi/main/en-us/ApiOverview/Debugging/Index.html) or
 > the universal use of [xdebug](https://xdebug.org/).
 
 The dump server gathers all `dump` call outputs, e.g. for preventing interference with HTTP or API responses.
 
 ![Console Command](./Documentation/Images/screenshot.png)
+
+## ✨ Features
+
+* Dump server collecting `dump()` output outside the HTTP/API response
+* [IDE deep links](Documentation/ide-deep-links.md) — click a source path to open it in your editor
+* [Output formats](Documentation/output-formats.md) — `cli`, `html`, and `json` (NDJSON), including AI-agent consumption
+* [PSR-14 events](Documentation/events.md) — react to dumps programmatically
+* [Extension configuration](Documentation/configuration.md) — suppress frontend output when no server is running
 
 ## 🔥 Installation
 
@@ -46,19 +54,28 @@ composer require --dev konradmichalik/typo3-dump-server
 
 Download the zip file from [TYPO3 extension repository (TER)](https://extensions.typo3.org/extension/typo3_dump_server).
 
-## 📊 Usage
+## 🚀 Quick start
 
-![Screencast](./Documentation/Images/screencast.gif)
-
-### Console command
-
-Start the dump server with the following command:
+Start the dump server, then call `dump()` anywhere in your TYPO3 code. Output appears in the terminal instead of the frontend response.
 
 ```bash
 vendor/bin/typo3 server:dump
 ```
 
+```php
+dump($variable);
+```
+
 ![Console Command](./Documentation/Images/screenshot-command.png)
+
+> [!WARNING]
+> The dump server protocol is unauthenticated and unencrypted, and dumps often contain sensitive data (credentials, session data, personal data). Keep the server bound to a loopback address (`127.0.0.1`) — never expose it via `0.0.0.0` or a public interface. Install the extension as a dev dependency (`composer require --dev`) so it is not deployed to production systems.
+
+## ⚡ Usage
+
+![Screencast](./Documentation/Images/screencast.gif)
+
+### Console command
 
 Use the format option to change the output format to `html`:
 
@@ -69,57 +86,11 @@ vendor/bin/typo3 server:dump --format=html > dump.html
 > [!NOTE]
 > The dump server will be available at `tcp://127.0.0.1:9912` by default. Use the environment variable `TYPO3_DUMP_SERVER_HOST` to change the host.
 
-> [!WARNING]
-> The dump server protocol is unauthenticated and unencrypted, and dumps often contain sensitive data (credentials, session data, personal data). Keep the server bound to a loopback address (`127.0.0.1`) — never expose it via `0.0.0.0` or a public interface. Install the extension as a dev dependency (`composer require --dev`) so it is not deployed to production systems.
-
-### IDE Deep Links
-
-Click on source file paths in the dump output to open them directly in your IDE. Configure the IDE via environment variable:
-
-```bash
-export TYPO3_DUMP_SERVER_IDE=phpstorm
-```
-
-Supported IDEs: `phpstorm`, `vscode`, `sublime`, `textmate`, `atom`
-
-You can also use a custom URL pattern with `%file%` and `%line%` placeholders:
-
-```bash
-export TYPO3_DUMP_SERVER_IDE="myide://open?file=%file%&line=%line%"
-```
-
-### TYPO3 Context
+### TYPO3 context
 
 The dump server automatically displays the TYPO3 version and application context (e.g. `Development`, `Production`) alongside each dump output.
 
-### Usage with AI agents
-
-Two options make dumps consumable by AI coding agents instead of only by humans reading a terminal.
-
-**NDJSON via the dump server** — use `--format=json` to get one JSON object per line instead of formatted tables. Like `--format=html`, redirect it to a file for an agent to read:
-
-```bash
-vendor/bin/typo3 server:dump --format=json > dump.ndjson
-```
-
-**File sink without a running server** — set `TYPO3_DUMP_SERVER_SINK` to a file path and dumps are appended there directly, so an agent can trigger a request and read the file afterwards instead of managing a background server process:
-
-```bash
-export TYPO3_DUMP_SERVER_SINK=/tmp/dumps.ndjson
-```
-
-Both emit the same schema, one line per dump:
-
-```json
-{"timestamp":"2026-09-18T10:12:33+02:00","clientId":1,"type":"array","value":{"uid":42,"title":"Foo"},"source":{"name":"MyController.php","file":"/path/MyController.php","line":42},"request":null,"cli":null,"typo3":{"version":"13.4.2","context":"Development"}}
-```
-
-`value` is a JSON-encodable rendering of the dumped variable: object property keys are cleaned of internal visibility markers, strings and array sizes are capped, and structures deeper than the configured limit are replaced with a `*MAX_DEPTH:<type>*` marker instead of being cut off silently.
-
-> [!WARNING]
-> The file sink only activates in the `Development` application context and is a no-op otherwise. Dumps often contain credentials, session data, or personal data — treat the sink file like any other debug output: keep it outside the webroot, add it to `.gitignore`, and never enable it in `Production`.
-
-### Dump
+### Dump function
 
 Use the `dump` function in your code:
 
@@ -141,46 +112,21 @@ Use the `symfony:dump` ViewHelper in your Fluid templates:
 <symfony:dump>{variable}</symfony:dump>
 ```
 
-### Extension settings
+## 📚 Documentation
 
-By default, a `dump()` call will add something like the following output to the frontend if the dump server isn't running:
-
-![Dump output in frontend](./Documentation/Images/output.jpg)
-
-You can suppress this output with the `suppressDump` setting in the extension configuration. If this setting is enabled, the output will be suppressed and the dump will only be sent to the dump server.
-
-You can find the extension settings in the TYPO3 backend under `Admin Tools > Settings > Extension Configuration > typo3_dump_server`.
-
-### Programmatic Handling
-
-You can listen to dump events programmatically using TYPO3's PSR-14 event system:
-
-```php
-use KonradMichalik\Typo3DumpServer\Event\DumpEvent;
-use TYPO3\CMS\Core\Attribute\AsEventListener;
-
-#[AsEventListener]
-final class MyDumpEventListener
-{
-    public function __invoke(DumpEvent $event): void
-    {
-        $value = $event->getValue();
-        $type = $event->getType();
-        
-        // Your custom logic here
-        error_log("Dumped {$type}: " . print_r($value, true));
-    }
-}
-```
-
-> [!NOTE]
-> Register your event listener via the `AsEventListener` attribute (TYPO3 >= 13) or in your service configuration (see [docs](https://docs.typo3.org/m/typo3/reference-coreapi/12.4/en-us/ExtensionArchitecture/HowTo/Events/Index.html#extension-development-event-listener)).
+| Page | What's inside |
+|------|----------------|
+| [Output formats](Documentation/output-formats.md) | `cli`, `html`, and `json` (NDJSON) output, plus the file sink for reading dumps without a running server, so agents can consume them |
+| [IDE deep links](Documentation/ide-deep-links.md) | Clickable source links in dump output, built-in IDEs and custom URL patterns |
+| [Extension configuration](Documentation/configuration.md) | Suppressing frontend dump output when no server is running |
+| [Events](Documentation/events.md) | Handling dumps programmatically via the PSR-14 `DumpEvent` |
+| [Development & feature testing](Documentation/DEVELOPMENT.md) | Manual QA checklist for contributors, covering every feature above |
 
 ## 🧑‍💻 Contributing
 
 Please have a look at [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
-## 💛 Acknowledgements
+## 💎 Credits
 
 This project is highly inspired by the [laravel-dump-server](https://github.com/beyondcode/laravel-dump-server) & the symfony [var-dumper](https://github.com/symfony/var-dumper) component itself.
 
