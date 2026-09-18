@@ -20,13 +20,16 @@ use KonradMichalik\Typo3DumpServer\Utility\EnvironmentHelper;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\VarDumper\Cloner\VarCloner;
 use Symfony\Component\VarDumper\Dumper\{CliDumper, HtmlDumper, ServerDumper};
-use Symfony\Component\VarDumper\Dumper\ContextProvider\{CliContextProvider, SourceContextProvider};
+use Symfony\Component\VarDumper\Dumper\ContextProvider\{CliContextProvider, ContextProviderInterface, SourceContextProvider};
 use Symfony\Component\VarDumper\VarDumper;
 use Throwable;
+use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
+use function array_filter;
 use function in_array;
 use function is_array;
+use function microtime;
 
 /**
  * DumpHandler.
@@ -60,6 +63,14 @@ final class DumpHandler
             return $handler($var);
         }
 
+        $sinkPath = EnvironmentHelper::getSinkPath();
+        if (null !== $sinkPath && self::isDevelopmentContext()) {
+            $handler = self::createSinkHandler($sinkPath);
+            VarDumper::setHandler($handler);
+
+            return $handler($var);
+        }
+
         if (self::shouldSuppressDump()) {
             VarDumper::setHandler(static function (): void {});
 
@@ -76,28 +87,73 @@ final class DumpHandler
     {
         $cloner = new VarCloner();
         $fallbackDumper = in_array(\PHP_SAPI, ['cli', 'phpdbg'], true) ? new CliDumper() : new HtmlDumper();
-        $dumper = new ServerDumper(EnvironmentHelper::getHost(), $fallbackDumper, [
-            'cli' => new CliContextProvider(),
-            'source' => new SourceContextProvider(),
-            'typo3' => new Typo3ContextProvider(),
-        ]);
+        $dumper = new ServerDumper(EnvironmentHelper::getHost(), $fallbackDumper, self::createContextProviders());
 
         return static function (mixed $var) use ($cloner, $dumper): ?string {
             $data = $cloner->cloneVar($var);
-            $context = [];
-
-            // Dispatch PSR-14 event with original variable
-            $eventDispatcher = self::getEventDispatcher();
-            if (null !== $eventDispatcher) {
-                try {
-                    $eventDispatcher->dispatch(new DumpEvent($var, $context));
-                } catch (Throwable) {
-                    // A faulty listener must never break the dump itself
-                }
-            }
+            self::dispatchDumpEvent($var, []);
 
             return $dumper->dump($data);
         };
+    }
+
+    private static function createSinkHandler(string $path): Closure
+    {
+        $cloner = new VarCloner();
+        $sink = DumpSink::withDefaults();
+        $contextProviders = self::createContextProviders();
+
+        return static function (mixed $var) use ($cloner, $sink, $path, $contextProviders): void {
+            $data = $cloner->cloneVar($var);
+
+            $context = ['timestamp' => microtime(true)];
+            foreach ($contextProviders as $name => $provider) {
+                $context[$name] = $provider->getContext();
+            }
+            $context = array_filter($context, static fn (mixed $value): bool => (bool) $value);
+
+            self::dispatchDumpEvent($var, $context);
+
+            $sink->write($path, $data, $context);
+        };
+    }
+
+    /**
+     * @return array<string, ContextProviderInterface>
+     */
+    private static function createContextProviders(): array
+    {
+        return [
+            'cli' => new CliContextProvider(),
+            'source' => new SourceContextProvider(),
+            'typo3' => new Typo3ContextProvider(),
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $context
+     */
+    private static function dispatchDumpEvent(mixed $var, array $context): void
+    {
+        $eventDispatcher = self::getEventDispatcher();
+        if (null === $eventDispatcher) {
+            return;
+        }
+
+        try {
+            $eventDispatcher->dispatch(new DumpEvent($var, $context));
+        } catch (Throwable) {
+            // A faulty listener must never break the dump itself
+        }
+    }
+
+    private static function isDevelopmentContext(): bool
+    {
+        try {
+            return Environment::getContext()->isDevelopment();
+        } catch (Throwable) {
+            return false;
+        }
     }
 
     private static function shouldSuppressDump(): bool

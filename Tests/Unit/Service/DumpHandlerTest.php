@@ -13,9 +13,10 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3DumpServer\Tests\Unit\Service;
 
-use KonradMichalik\Ttt\Attribute\WithTypo3ConfVars;
+use KonradMichalik\Ttt\Attribute\{WithEnvironment, WithTypo3ConfVars};
 use KonradMichalik\Ttt\Traits\ConfVarsSandbox;
 use KonradMichalik\Typo3DumpServer\Service\DumpHandler;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use ReflectionClass;
@@ -23,7 +24,14 @@ use ReflectionProperty;
 use RuntimeException;
 use Symfony\Component\VarDumper\VarDumper;
 
+use function file_get_contents;
+use function is_file;
 use function is_string;
+use function json_decode;
+use function sys_get_temp_dir;
+use function tempnam;
+use function trim;
+use function unlink;
 
 /**
  * DumpHandlerTest.
@@ -37,10 +45,17 @@ final class DumpHandlerTest extends TestCase
 
     private string $originalHostValue;
 
+    private string $originalSinkValue;
+
+    private ?string $sinkPath = null;
+
     protected function setUp(): void
     {
         $dumpServerHost = getenv('TYPO3_DUMP_SERVER_HOST');
         $this->originalHostValue = is_string($dumpServerHost) ? $dumpServerHost : '';
+
+        $dumpServerSink = getenv('TYPO3_DUMP_SERVER_SINK');
+        $this->originalSinkValue = is_string($dumpServerSink) ? $dumpServerSink : '';
     }
 
     protected function tearDown(): void
@@ -58,6 +73,16 @@ final class DumpHandlerTest extends TestCase
             putenv('TYPO3_DUMP_SERVER_HOST='.$this->originalHostValue);
         } else {
             putenv('TYPO3_DUMP_SERVER_HOST');
+        }
+
+        if ('' !== $this->originalSinkValue) {
+            putenv('TYPO3_DUMP_SERVER_SINK='.$this->originalSinkValue);
+        } else {
+            putenv('TYPO3_DUMP_SERVER_SINK');
+        }
+
+        if (null !== $this->sinkPath && is_file($this->sinkPath)) {
+            unlink($this->sinkPath);
         }
     }
 
@@ -148,6 +173,82 @@ final class DumpHandlerTest extends TestCase
         $result = dump('fallback-value');
 
         self::assertSame('fallback-value', $result);
+    }
+
+    #[Test]
+    #[WithEnvironment(context: 'Development')]
+    public function dumpWritesToSinkWhenServerUnavailableAndDevelopmentContext(): void
+    {
+        putenv('TYPO3_DUMP_SERVER_HOST=tcp://127.0.0.1:59999');
+        $this->sinkPath = (string) tempnam(sys_get_temp_dir(), 'dump_handler_sink_test_');
+        putenv('TYPO3_DUMP_SERVER_SINK='.$this->sinkPath);
+
+        DumpHandler::register();
+        dump('sink-value');
+
+        $line = json_decode(trim((string) file_get_contents($this->sinkPath)), true);
+        self::assertSame('sink-value', $line['value']);
+    }
+
+    #[Test]
+    #[WithEnvironment(context: 'Production')]
+    public function dumpDoesNotWriteToSinkOutsideDevelopmentContext(): void
+    {
+        putenv('TYPO3_DUMP_SERVER_HOST=tcp://127.0.0.1:59999');
+        $this->sinkPath = (string) tempnam(sys_get_temp_dir(), 'dump_handler_sink_test_');
+        unlink($this->sinkPath);
+        putenv('TYPO3_DUMP_SERVER_SINK='.$this->sinkPath);
+
+        DumpHandler::register();
+        $result = dump('fallback-value');
+
+        self::assertFalse(is_file($this->sinkPath));
+        self::assertSame('fallback-value', $result);
+    }
+
+    #[Test]
+    #[WithEnvironment(context: 'Development')]
+    public function dumpPrefersServerOverSinkWhenBothAreAvailable(): void
+    {
+        $server = stream_socket_server('tcp://127.0.0.1:0');
+        self::assertNotFalse($server);
+        $address = stream_socket_get_name($server, false);
+        putenv('TYPO3_DUMP_SERVER_HOST=tcp://'.$address);
+
+        $this->sinkPath = (string) tempnam(sys_get_temp_dir(), 'dump_handler_sink_test_');
+        unlink($this->sinkPath);
+        putenv('TYPO3_DUMP_SERVER_SINK='.$this->sinkPath);
+
+        DumpHandler::register();
+        dump('test');
+
+        self::assertTrue($this->hasPendingConnection($server));
+        self::assertFalse(is_file($this->sinkPath));
+
+        fclose($server);
+    }
+
+    #[Test]
+    #[WithEnvironment(context: 'Development')]
+    public function dumpStillWritesToSinkWhenEventListenerThrows(): void
+    {
+        putenv('TYPO3_DUMP_SERVER_HOST=tcp://127.0.0.1:59999');
+        $this->sinkPath = (string) tempnam(sys_get_temp_dir(), 'dump_handler_sink_test_');
+        putenv('TYPO3_DUMP_SERVER_SINK='.$this->sinkPath);
+
+        $throwingDispatcher = new class implements EventDispatcherInterface {
+            public function dispatch(object $event): object
+            {
+                throw new RuntimeException('listener failure', 3423423423);
+            }
+        };
+        (new ReflectionProperty(DumpHandler::class, 'eventDispatcher'))->setValue(null, $throwingDispatcher);
+
+        DumpHandler::register();
+        dump('sink-value');
+
+        $line = json_decode(trim((string) file_get_contents($this->sinkPath)), true);
+        self::assertSame('sink-value', $line['value']);
     }
 
     public function testIsServerAvailableReturnsFalseForInvalidHost(): void

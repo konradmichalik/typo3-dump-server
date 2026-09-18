@@ -74,4 +74,15 @@ final class EnvironmentHelper
 
         return null;
     }
+
+    public static function getSinkPath(): ?string
+    {
+        $path = getenv('TYPO3_DUMP_SERVER_SINK');
+
+        if (false === $path || '' === $path) {
+            return null;
+        }
+
+        return $path;
+    }
 }
