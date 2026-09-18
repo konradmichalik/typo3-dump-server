@@ -96,10 +96,10 @@ The dump server automatically displays the TYPO3 version and application context
 
 Two options make dumps consumable by AI coding agents instead of only by humans reading a terminal.
 
-**NDJSON via the dump server** — use `--format=json` to get one JSON object per line instead of formatted tables:
+**NDJSON via the dump server** — use `--format=json` to get one JSON object per line instead of formatted tables. Like `--format=html`, redirect it to a file for an agent to read:
 
 ```bash
-vendor/bin/typo3 server:dump --format=json
+vendor/bin/typo3 server:dump --format=json > dump.ndjson
 ```
 
 **File sink without a running server** — set `TYPO3_DUMP_SERVER_SINK` to a file path and dumps are appended there directly, so an agent can trigger a request and read the file afterwards instead of managing a background server process:
