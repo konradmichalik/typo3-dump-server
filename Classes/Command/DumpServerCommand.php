@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3DumpServer\Command;
 
-use KonradMichalik\Typo3DumpServer\Command\Descriptor\{Typo3CliDescriptor, Typo3HtmlDescriptor};
+use KonradMichalik\Typo3DumpServer\Command\Descriptor\{Typo3CliDescriptor, Typo3HtmlDescriptor, Typo3JsonDescriptor};
 use KonradMichalik\Typo3DumpServer\Utility\{EnvironmentHelper, IdeLinkGenerator};
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
@@ -51,6 +51,7 @@ final class DumpServerCommand extends Command
         $this->descriptors = $descriptors + [
             'cli' => new Typo3CliDescriptor(new CliDumper(), $ideLinkGenerator),
             'html' => new Typo3HtmlDescriptor(new HtmlDumper(), $ideLinkGenerator),
+            'json' => Typo3JsonDescriptor::withDefaults(),
         ];
         parent::__construct($name);
     }

@@ -133,6 +133,24 @@ final class EnvironmentHelperTest extends TestCase
         self::assertSame(['/opt/app', '/Users/me/custom'], $mapping);
     }
 
+    #[WithEnvVar('TYPO3_DUMP_SERVER_SINK')]
+    public function testGetSinkPathReturnsNullWhenEnvironmentVariableNotSet(): void
+    {
+        self::assertNull(EnvironmentHelper::getSinkPath());
+    }
+
+    #[WithEnvVar('TYPO3_DUMP_SERVER_SINK', '')]
+    public function testGetSinkPathReturnsNullWhenEnvironmentVariableIsEmpty(): void
+    {
+        self::assertNull(EnvironmentHelper::getSinkPath());
+    }
+
+    #[WithEnvVar('TYPO3_DUMP_SERVER_SINK', '/tmp/dumps.ndjson')]
+    public function testGetSinkPathReturnsEnvironmentVariableWhenSet(): void
+    {
+        self::assertSame('/tmp/dumps.ndjson', EnvironmentHelper::getSinkPath());
+    }
+
     #[WithEnvVar('TYPO3_DUMP_SERVER_PATH_MAP')]
     #[WithEnvVar('DDEV_APPROOT', '')]
     public function testGetPathMappingIgnoresEmptyDdevAppRoot(): void

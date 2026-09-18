@@ -11,3 +11,9 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: ../../Classes/Command/Descriptor/Typo3HtmlDescriptor.php
+
+		-
+			message: '#^Method KonradMichalik\\Typo3DumpServer\\Command\\Descriptor\\Typo3JsonDescriptor\:\:describe\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../../Classes/Command/Descriptor/Typo3JsonDescriptor.php

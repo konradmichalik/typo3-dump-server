@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3DumpServer\Command\Descriptor;
 
+use KonradMichalik\Typo3DumpServer\Dumper\DumpContext;
 use KonradMichalik\Typo3DumpServer\Utility\IdeLinkGenerator;
 use ReflectionClass;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -27,7 +28,6 @@ use function file_get_contents;
 use function htmlspecialchars;
 use function in_array;
 use function is_array;
-use function is_float;
 use function is_int;
 use function is_string;
 use function parse_url;
@@ -70,7 +70,7 @@ final class Typo3HtmlDescriptor implements DumpDescriptorInterface
         $projectDir = $this->resolveProjectDir($context);
         $sourceDescription = $this->resolveSourceDescription($context);
         $typo3Info = $this->resolveTypo3Info($context);
-        $timestamp = $this->extractTimestamp($context);
+        $timestamp = DumpContext::extractTimestamp($context);
 
         $isoDate = date('c', $timestamp);
         $readableDate = date('r', $timestamp);
@@ -285,18 +285,6 @@ final class Typo3HtmlDescriptor implements DumpDescriptorInterface
         $line = $source['line'] ?? 0;
 
         return is_int($line) ? $line : 0;
-    }
-
-    /**
-     * @param array<string, mixed> $context
-     */
-    private function extractTimestamp(array $context): int
-    {
-        $timestamp = $context['timestamp'] ?? null;
-
-        return is_int($timestamp) || is_float($timestamp)
-            ? (int) $timestamp
-            : 0;
     }
 
     private function escape(string $value): string

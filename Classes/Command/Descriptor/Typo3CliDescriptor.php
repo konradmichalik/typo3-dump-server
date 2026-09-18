@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3DumpServer\Command\Descriptor;
 
+use KonradMichalik\Typo3DumpServer\Dumper\DumpContext;
 use KonradMichalik\Typo3DumpServer\Utility\IdeLinkGenerator;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -23,7 +24,6 @@ use Symfony\Component\VarDumper\Dumper\CliDumper;
 
 use function date;
 use function is_array;
-use function is_float;
 use function is_int;
 use function is_string;
 use function rtrim;
@@ -50,11 +50,7 @@ final class Typo3CliDescriptor implements DumpDescriptorInterface
         $this->dumper->setColors($output->isDecorated());
 
         /** @var array<string, mixed> $context */
-        $rawTimestamp = $context['timestamp'] ?? null;
-        $timestamp = is_int($rawTimestamp) || is_float($rawTimestamp)
-            ? (int) $rawTimestamp
-            : 0;
-        $rows = [['date', date('r', $timestamp)]];
+        $rows = [['date', date('r', DumpContext::extractTimestamp($context))]];
         $lastIdentifier = $this->lastIdentifier;
         $this->lastIdentifier = $clientId;
 
