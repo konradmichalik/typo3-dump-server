@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3DumpServer\Tests\Unit\Command;
 
+use KonradMichalik\Typo3DumpServer\Command\Descriptor\Typo3JsonDescriptor;
 use KonradMichalik\Typo3DumpServer\Command\DumpServerCommand;
 use KonradMichalik\Typo3DumpServer\Utility\IdeLinkGenerator;
 use PHPUnit\Framework\TestCase;
@@ -125,6 +126,14 @@ final class DumpServerCommandTest extends TestCase
 
         self::assertSame('cli', $formatOption->getDefault());
         self::assertTrue($formatOption->isValueRequired());
+    }
+
+    public function testJsonFormatIsRegisteredByDefault(): void
+    {
+        $descriptors = (new ReflectionProperty($this->command, 'descriptors'))->getValue($this->command);
+        assert(is_array($descriptors));
+
+        self::assertInstanceOf(Typo3JsonDescriptor::class, $descriptors['json']);
     }
 
     public function testIdeLinkGeneratorAppliesConfiguredPathMapping(): void
