@@ -69,7 +69,7 @@ dump($variable);
 ![Console Command](./Documentation/Images/screenshot-command.png)
 
 > [!WARNING]
-> The dump server protocol is unauthenticated and unencrypted, and dumps often contain sensitive data (credentials, session data, personal data). Keep the server bound to a loopback address (`127.0.0.1`) — never expose it via `0.0.0.0` or a public interface. Install the extension as a dev dependency (`composer require --dev`) so it is not deployed to production systems.
+> The dump server protocol is unauthenticated and unencrypted, and dumps often contain sensitive data (credentials, session data, personal data). Keep the server bound to a loopback address (`127.0.0.1`) — never expose it via `0.0.0.0` or a public interface. Install the extension as a dev dependency (`composer require --dev`), and make sure production deployments run `composer install --no-dev` (or an equivalent process that excludes dev dependencies) so it is not deployed to production systems.
 
 ## ⚡ Usage
 

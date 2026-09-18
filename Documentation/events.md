@@ -11,11 +11,12 @@ final class MyDumpEventListener
 {
     public function __invoke(DumpEvent $event): void
     {
-        $value = $event->getValue();
         $type = $event->getType();
 
-        // Your custom logic here
-        error_log("Dumped {$type}: " . print_r($value, true));
+        // $event->getValue() returns the original dumped value, which can contain
+        // credentials, session data, or personal data. Log only $type or explicitly
+        // redacted metadata, never the raw value.
+        error_log("Dumped value of type: {$type}");
     }
 }
 ```
