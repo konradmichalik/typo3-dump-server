@@ -16,7 +16,7 @@ namespace KonradMichalik\Typo3DumpServer\Tests\Unit\Dumper;
 use KonradMichalik\Typo3DumpServer\Dumper\DumpNormalizer;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\VarDumper\Cloner\VarCloner;
+use Symfony\Component\VarDumper\Cloner\{Data, Stub, VarCloner};
 
 /**
  * DumpNormalizerTest.
@@ -168,6 +168,19 @@ final class DumpNormalizerTest extends TestCase
         fclose($resource);
 
         self::assertSame('*RESOURCE:stream*', $normalizer->normalize($data));
+    }
+
+    #[Test]
+    public function normalizesUntypedStubAsNull(): void
+    {
+        $normalizer = DumpNormalizer::withDefaults();
+        // A Stub whose type Data::getType() cannot resolve (neither string,
+        // array, object, resource, nor a reference) normalizes to null.
+        $stub = new Stub();
+        $stub->type = 0;
+        $data = new Data([[$stub]]);
+
+        self::assertNull($normalizer->normalize($data));
     }
 
     #[Test]

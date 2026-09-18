@@ -15,6 +15,7 @@ namespace KonradMichalik\Typo3DumpServer\Dumper;
 
 use Symfony\Component\VarDumper\Cloner\Data;
 
+use function assert;
 use function end;
 use function explode;
 use function in_array;
@@ -117,9 +118,12 @@ final readonly class DumpNormalizer
                 break;
             }
 
-            $result[$this->normalizeKey($key)] = $child instanceof Data
-                ? $this->normalizeNode($child, $depth + 1)
-                : $child;
+            // Data's non-recursive iterator always wraps its children as Data
+            // instances, so this narrows the type for static analysis rather
+            // than guarding against a case that can actually occur.
+            assert($child instanceof Data);
+
+            $result[$this->normalizeKey($key)] = $this->normalizeNode($child, $depth + 1);
             ++$count;
         }
 

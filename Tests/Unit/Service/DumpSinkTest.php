@@ -99,6 +99,19 @@ final class DumpSinkTest extends TestCase
     }
 
     #[Test]
+    public function writeSilentlyDoesNothingWhenFileCannotBeOpened(): void
+    {
+        $sink = DumpSink::withDefaults();
+        $data = (new VarCloner())->cloneVar('hello');
+        // $this->path does not exist as a directory, so fopen('c') below it fails.
+        $unreachablePath = $this->path.'/dump.ndjson';
+
+        @$sink->write($unreachablePath, $data, ['timestamp' => 1758182400]);
+
+        self::assertFalse(is_file($unreachablePath));
+    }
+
+    #[Test]
     public function writeRestrictsFilePermissionsToOwnerOnly(): void
     {
         $sink = DumpSink::withDefaults();

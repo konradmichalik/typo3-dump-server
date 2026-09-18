@@ -16,7 +16,7 @@ namespace KonradMichalik\Typo3DumpServer\Tests\Unit\Service;
 use KonradMichalik\Ttt\Attribute\{WithEnvironment, WithTypo3ConfVars};
 use KonradMichalik\Ttt\Traits\ConfVarsSandbox;
 use KonradMichalik\Typo3DumpServer\Service\DumpHandler;
-use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\{RunInSeparateProcess, Test};
 use PHPUnit\Framework\TestCase;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use ReflectionClass;
@@ -188,6 +188,24 @@ final class DumpHandlerTest extends TestCase
 
         $line = json_decode(trim((string) file_get_contents($this->sinkPath)), true);
         self::assertSame('sink-value', $line['value']);
+    }
+
+    #[Test]
+    #[RunInSeparateProcess]
+    public function dumpDoesNotWriteToSinkWhenApplicationContextIsUnavailable(): void
+    {
+        putenv('TYPO3_DUMP_SERVER_HOST=tcp://127.0.0.1:59999');
+        $this->sinkPath = (string) tempnam(sys_get_temp_dir(), 'dump_handler_sink_test_');
+        unlink($this->sinkPath);
+        putenv('TYPO3_DUMP_SERVER_SINK='.$this->sinkPath);
+
+        // Fresh process, so Environment::initialize() was never called here:
+        // Environment::getContext() throws, which must be treated like "not Development".
+        DumpHandler::register();
+        $result = dump('fallback-value');
+
+        self::assertFalse(is_file($this->sinkPath));
+        self::assertSame('fallback-value', $result);
     }
 
     #[Test]
