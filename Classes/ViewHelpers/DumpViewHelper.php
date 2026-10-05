@@ -32,6 +32,7 @@ class DumpViewHelper extends AbstractViewHelper
 
     public function render(): string
     {
+        // @phpstan-ignore disallowed.function (this ViewHelper exposes dump() to Fluid templates)
         $result = dump($this->renderChildren());
 
         return is_string($result) ? $result : '';

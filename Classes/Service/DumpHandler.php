@@ -80,6 +80,7 @@ final class DumpHandler
         // Neither server nor suppression: restore Symfony's default dump behavior
         VarDumper::setHandler(null);
 
+        // @phpstan-ignore disallowed.method (restoring the default dump behavior is the purpose of this class)
         return VarDumper::dump($var);
     }
 
