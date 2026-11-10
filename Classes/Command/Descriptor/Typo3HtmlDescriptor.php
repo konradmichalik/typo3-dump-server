@@ -125,14 +125,14 @@ final class Typo3HtmlDescriptor implements DumpDescriptorInterface
      */
     private function resolveTitle(array $context): string
     {
-        if (isset($context['request']) && is_array($context['request'])) {
-            return $this->resolveRequestTitle($context['request']);
+        $request = $this->section($context, 'request');
+        if (null !== $request) {
+            return $this->resolveRequestTitle($request);
         }
 
-        if (isset($context['cli']) && is_array($context['cli'])) {
-            $commandLine = is_string($context['cli']['command_line'] ?? null)
-                ? $context['cli']['command_line']
-                : '';
+        $cli = $this->section($context, 'cli');
+        if (null !== $cli) {
+            $commandLine = is_string($cli['command_line'] ?? null) ? $cli['command_line'] : '';
 
             return '<code>$ </code>'.$this->escape($commandLine);
         }
@@ -161,15 +161,8 @@ final class Typo3HtmlDescriptor implements DumpDescriptorInterface
      */
     private function resolveDedupIdentifier(array $context): string
     {
-        if (isset($context['request']) && is_array($context['request'])) {
-            $identifier = $context['request']['identifier'] ?? null;
-            if (is_string($identifier)) {
-                return $identifier;
-            }
-        }
-
-        if (isset($context['cli']) && is_array($context['cli'])) {
-            $identifier = $context['cli']['identifier'] ?? null;
+        foreach (['request', 'cli'] as $key) {
+            $identifier = $this->section($context, $key)['identifier'] ?? null;
             if (is_string($identifier)) {
                 return $identifier;
             }
@@ -183,11 +176,7 @@ final class Typo3HtmlDescriptor implements DumpDescriptorInterface
      */
     private function resolveController(array $context): ?string
     {
-        if (!isset($context['request']) || !is_array($context['request'])) {
-            return null;
-        }
-
-        $controller = $context['request']['controller'] ?? null;
+        $controller = $this->section($context, 'request')['controller'] ?? null;
         if (!$controller instanceof Data) {
             return null;
         }
@@ -203,11 +192,7 @@ final class Typo3HtmlDescriptor implements DumpDescriptorInterface
      */
     private function resolveProjectDir(array $context): ?string
     {
-        if (!isset($context['source']) || !is_array($context['source'])) {
-            return null;
-        }
-
-        $projectDir = $context['source']['project_dir'] ?? null;
+        $projectDir = $this->section($context, 'source')['project_dir'] ?? null;
 
         return is_string($projectDir) ? $this->escape($projectDir) : null;
     }
@@ -217,12 +202,11 @@ final class Typo3HtmlDescriptor implements DumpDescriptorInterface
      */
     private function resolveSourceDescription(array $context): string
     {
-        if (!isset($context['source']) || !is_array($context['source'])) {
+        $source = $this->section($context, 'source');
+        if (null === $source) {
             return '';
         }
 
-        /** @var array<string, mixed> $source */
-        $source = $context['source'];
         $name = is_string($source['name'] ?? null) ? $this->escape($source['name']) : '-';
         $line = $this->extractLineNumber($source);
         $description = sprintf('%s on line %d', $name, $line);
@@ -240,11 +224,11 @@ final class Typo3HtmlDescriptor implements DumpDescriptorInterface
      */
     private function resolveTypo3Info(array $context): ?string
     {
-        if (!isset($context['typo3']) || !is_array($context['typo3'])) {
+        $typo3 = $this->section($context, 'typo3');
+        if (null === $typo3) {
             return null;
         }
 
-        $typo3 = $context['typo3'];
         $version = is_string($typo3['version'] ?? null) ? $typo3['version'] : '-';
         $appContext = is_string($typo3['context'] ?? null) ? $typo3['context'] : '-';
 
@@ -268,6 +252,21 @@ final class Typo3HtmlDescriptor implements DumpDescriptorInterface
         $fileLink = $source['file_link'] ?? null;
 
         return is_string($fileLink) && $this->hasSafeLinkScheme($fileLink) ? $fileLink : null;
+    }
+
+    /**
+     * @param array<string, mixed> $context
+     *
+     * @return array<string, mixed>|null
+     */
+    private function section(array $context, string $key): ?array
+    {
+        $section = $context[$key] ?? null;
+
+        /** @var array<string, mixed>|null $typed */
+        $typed = is_array($section) ? $section : null;
+
+        return $typed;
     }
 
     private function hasSafeLinkScheme(string $url): bool

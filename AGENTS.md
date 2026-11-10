@@ -18,7 +18,7 @@ TYPO3 extension that brings the Symfony Var Dump Server to TYPO3. It collects al
 - `Classes/ViewHelpers/` Fluid `DumpViewHelper`
 - `Configuration/`, `Resources/`, `ext_localconf.php` TYPO3 registration (`ext_localconf.php` calls `DumpHandler::register()`)
 - `Tests/Unit/` PHPUnit tests, mirrors `Classes/`
-- `Tests/CGL/` separate Composer project with all code style, static analysis and migration tooling
+- `Tests/CGL/` separate Composer project with all code style, static analysis and migration tooling. Its `composer.lock` is committed and updated by Renovate, so tool releases only reach CI through a Renovate PR
 - `Documentation/` user docs and `DEVELOPMENT.md` (manual feature checklist)
 - `.ddev/` DDEV setup, including commands to install TYPO3 11 to 14 test instances
 
